@@ -51,9 +51,10 @@
             z-index: 3;
         }
         .glass-nav, .card {
-            background: rgba(10, 25, 47, 0.5);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(100, 255, 218, 0.1);
+            background: rgba(10, 25, 47, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            box-shadow: inset 0 0 2000px rgba(255, 255, 255, 0.05);
         }
         .text-lightest { color: #ccd6f6; }
         .text-accent { color: #64ffda; }
@@ -141,7 +142,7 @@
 
         <main class="container mx-auto px-6 md:px-10 lg:px-20">
             <section id="about" class="min-h-screen flex flex-col justify-center py-20 text-center">
-                <img id="profile-img" class="reveal rounded-full h-40 w-40 object-cover mx-auto mb-8 border-2 border-accent shadow-lg" src="https://i.ibb.co/3cYsW1s/1732065183883.jpg" alt="Vickram Ravi profile picture">
+                <img id="profile-img" class="reveal rounded-full h-40 w-40 object-cover mx-auto mb-8 border-2 border-accent shadow-lg" src="./1732065183883.jpg" alt="Vickram Ravi profile picture" onerror="this.onerror=null;this.src='https://placehold.co/160x160/020c1b/64ffda?text=VR';">
                 <p class="text-accent text-lg mb-4 reveal" style="transition-delay: 100ms;">Vickram Ravi</p>
                 <h1 class="glitch reveal" data-text="Data & AI Engineer" style="transition-delay: 200ms;">Data & AI Engineer</h1>
                 <div id="summary-content" class="text-lg text-gray-400 mt-8 max-w-2xl mx-auto reveal" style="transition-delay: 300ms;"></div>
@@ -196,7 +197,7 @@
             skills: {
                 chartData: {
                     labels: ['Data & AI Engineering', 'Programming & Data', 'Cloud & DevOps', 'BI & Visualization', 'Project Management'],
-                    datasets: [{ label: 'Proficiency', data: [90, 85, 80, 85, 75], backgroundColor: 'rgba(100, 255, 218, 0.2)', borderColor: '#64ffda', borderWidth: 2, hoverBackgroundColor: 'rgba(100, 255, 218, 0.4)' }]
+                    datasets: [{ label: 'Proficiency', data: [95, 92, 90, 94, 91], backgroundColor: 'rgba(100, 255, 218, 0.2)', borderColor: '#64ffda', borderWidth: 2, hoverBackgroundColor: 'rgba(100, 255, 218, 0.4)' }]
                 },
             },
             projects: [
@@ -322,7 +323,7 @@
         }
         function renderSkills() {
             const ctx = document.getElementById('skillsChart').getContext('2d');
-            new Chart(ctx, { type: 'bar', data: data.skills.chartData, options: { indexAxis: 'y', maintainAspectRatio: false, responsive: true, scales: { x: { beginAtZero: true, grid: { color: 'rgba(204, 214, 246, 0.1)' }, ticks: { color: '#8892b0', font: { size: 12 } } }, y: { grid: { display: false }, ticks: { color: '#ccd6f6', font: { size: 14 } } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0a192f', titleColor: '#ccd6f6', bodyColor: '#ccd6f6', borderColor: '#64ffda', borderWidth: 1 } } } });
+            new Chart(ctx, { type: 'bar', data: data.skills.chartData, options: { indexAxis: 'y', maintainAspectRatio: false, responsive: true, scales: { x: { min: 80, grid: { color: 'rgba(204, 214, 246, 0.1)' }, ticks: { color: '#8892b0', font: { size: 12 } } }, y: { grid: { display: false }, ticks: { color: '#ccd6f6', font: { size: 14 } } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0a192f', titleColor: '#ccd6f6', bodyColor: '#ccd6f6', borderColor: '#64ffda', borderWidth: 1 } } } });
         }
         function renderProjects() {
             const container = document.getElementById('projects-content');
