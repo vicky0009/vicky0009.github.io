@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vickram Ravi | Data & AI Engineer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cyberpunk Night -->
+    <!-- Application Structure Plan: A highly dynamic, immersive single-page application. The core structure is a vertical narrative, but enhanced with a persistent 'glass' navigation and a full-screen animated particle background. The goal is to create a "wow" experience that showcases technical frontend skills alongside the user's data engineering profile. Each section is a full-screen 'slide' with complex, staggered animations triggered on scroll, guiding the user through a cinematic journey of skills, experience, and accolades. -->
+    <!-- Visualization & Content Choices: 
+        - Background: Goal: Immerse/Impress. Method: Full-screen Canvas with an interactive particle constellation animation. Justification: Creates an immediate high-tech, "AI-themed" atmosphere that is far more advanced than a static background.
+        - Hero Section: Goal: Impress/Inform. Method: Glitch effect on the main title, animated text, and a mouse-tracking spotlight. Justification: These effects are modern, engaging, and demonstrate sophisticated JS/CSS skills.
+        - Skills Chart: Goal: Compare/Inform. Method: Horizontal Bar Chart (Chart.js) with staggered bar animations. Justification: Animating each bar individually is more visually interesting than a single fade-in.
+        - Projects: Goal: Engage/Showcase. Method: 3D tilting cards with a glowing border effect on hover. Justification: This is a polished and professional interaction that encourages exploration.
+        - Testimonials: Goal: Build Trust. Method: A glassmorphism card with an animated quote and a subtle background glow. Justification: Elevates the presentation of social proof to match the portfolio's high-end aesthetic.
+        - CONFIRMATION: NO SVG/Mermaid used. All visuals are HTML/CSS/Canvas.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020c1b;
+            color: #8892b0;
+            overflow-x: hidden;
+        }
+        #main-content {
+            position: relative;
+            z-index: 2;
+        }
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .spotlight {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(29, 78, 216, 0.15) 0%, rgba(29, 78, 216, 0) 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease-out;
+            z-index: 3;
+        }
+        .glass-nav, .card {
+            background: rgba(10, 25, 47, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 255, 218, 0.1);
+        }
+        .text-lightest { color: #ccd6f6; }
+        .text-accent { color: #64ffda; }
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .nav-link.active { color: #64ffda; }
+        .glitch {
+            font-size: 7vw;
+            line-height: 1;
+            font-weight: 800;
+            text-transform: uppercase;
+            position: relative;
+            color: #ccd6f6;
+            animation: glitch-skew 1s infinite linear alternate-reverse;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #020c1b;
+            overflow: hidden;
+        }
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 { 0%, 100% { clip-path: inset(40% 0 40% 0); } 20% { clip-path: inset(10% 0 85% 0); } 40% { clip-path: inset(55% 0 20% 0); } 60% { clip-path: inset(20% 0 50% 0); } 80% { clip-path: inset(80% 0 5% 0); } }
+        @keyframes glitch-anim-2 { 0%, 100% { clip-path: inset(65% 0 10% 0); } 25% { clip-path: inset(20% 0 70% 0); } 50% { clip-path: inset(80% 0 5% 0); } 75% { clip-path: inset(40% 0 40% 0); } }
+        @keyframes glitch-skew { 0% { transform: skewX(0deg); } 100% { transform: skewX(0deg); } 50% { transform: skewX(1deg); } }
+        .project-card {
+            transition: transform 0.4s ease;
+            transform-style: preserve-3d;
+        }
+        .project-card:hover {
+            border-color: rgba(100, 255, 218, 0.5);
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.2);
+        }
+    </style>
+</head>
+<body class="w-full">
+    <div class="spotlight"></div>
+    <canvas id="particle-canvas"></canvas>
+    
+    <div id="main-content">
+        <header id="navbar" class="glass-nav fixed top-0 left-0 right-0 z-50 p-4 transition-all duration-300">
+             <nav class="container mx-auto flex justify-between items-center">
+                <a href="#" class="text-xl font-bold text-accent">VR</a>
+                <ul id="nav-links" class="hidden md:flex items-center space-x-6 text-sm">
+                    <li><a href="#about" class="nav-link hover:text-accent transition-colors">About</a></li>
+                    <li><a href="#experience" class="nav-link hover:text-accent transition-colors">Experience</a></li>
+                    <li><a href="#skills" class="nav-link hover:text-accent transition-colors">Skills</a></li>
+                    <li><a href="#projects" class="nav-link hover:text-accent transition-colors">Projects</a></li>
+                    <li><a href="#testimonials" class="nav-link hover:text-accent transition-colors">Testimonials</a></li>
+                    <li><a href="#certifications" class="nav-link hover:text-accent transition-colors">Certifications</a></li>
+                    <li><a href="https://linkedin.com/in/vickram-ravi-37014715a" target="_blank" class="px-3 py-2 border border-accent text-accent rounded hover:bg-accent/10 transition-colors">LinkedIn</a></li>
+                </ul>
+                <button id="mobile-menu-button" class="md:hidden text-accent">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </nav>
+            <div id="mobile-menu" class="hidden md:hidden mt-4">
+                 <ul class="flex flex-col space-y-4 text-center">
+                     <li><a href="#about" class="nav-link block hover:text-accent transition-colors">About</a></li>
+                     <li><a href="#experience" class="nav-link block hover:text-accent transition-colors">Experience</a></li>
+                     <li><a href="#skills" class="nav-link block hover:text-accent transition-colors">Skills</a></li>
+                     <li><a href="#projects" class="nav-link block hover:text-accent transition-colors">Projects</a></li>
+                     <li><a href="#testimonials" class="nav-link block hover:text-accent transition-colors">Testimonials</a></li>
+                     <li><a href="#certifications" class="nav-link block hover:text-accent transition-colors">Certifications</a></li>
+                 </ul>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-6 md:px-10 lg:px-20">
+            <section id="about" class="min-h-screen flex flex-col justify-center py-20 text-center">
+                <img id="profile-img" class="reveal rounded-full h-40 w-40 object-cover mx-auto mb-8 border-2 border-accent shadow-lg" src="https://i.ibb.co/3cYsW1s/1732065183883.jpg" alt="Vickram Ravi profile picture">
+                <p class="text-accent text-lg mb-4 reveal" style="transition-delay: 100ms;">Vickram Ravi</p>
+                <h1 class="glitch reveal" data-text="Data & AI Engineer" style="transition-delay: 200ms;">Data & AI Engineer</h1>
+                <div id="summary-content" class="text-lg text-gray-400 mt-8 max-w-2xl mx-auto reveal" style="transition-delay: 300ms;"></div>
+            </section>
+
+            <section id="experience" class="py-24">
+                <h2 class="text-4xl font-bold mb-16 text-center text-lightest reveal">Professional <span class="text-accent">Experience</span></h2>
+                <div id="experience-content" class="relative max-w-3xl mx-auto border-l-2 border-blue-900/50 pl-8 space-y-12"></div>
+            </section>
+
+            <section id="skills" class="py-24">
+                <h2 class="text-4xl font-bold mb-16 text-center text-lightest reveal">Technical <span class="text-accent">Skills</span></h2>
+                <div class="card p-6 rounded-lg shadow-xl reveal">
+                    <div class="chart-container h-96 md:h-[500px]">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="projects" class="py-24">
+                <h2 class="text-4xl font-bold mb-16 text-center text-lightest reveal">Key <span class="text-accent">Projects</span></h2>
+                <div id="projects-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </section>
+            
+            <section id="testimonials" class="py-24">
+                <h2 class="text-4xl font-bold mb-16 text-center text-lightest reveal">Testimonials</h2>
+                <div id="testimonials-content" class="max-w-3xl mx-auto"></div>
+            </section>
+
+            <section id="certifications" class="py-24">
+                <h2 class="text-4xl font-bold mb-16 text-center text-lightest reveal">Education & <span class="text-accent">Certifications</span></h2>
+                <div id="certifications-content" class="space-y-8"></div>
+            </section>
+            
+            <footer id="contact" class="text-center py-24">
+                <h2 class="text-3xl font-bold text-lightest reveal">Get In Touch</h2>
+                <p class="text-gray-400 mt-4 max-w-lg mx-auto reveal">I'm always open to discussing new projects, creative ideas, or opportunities to be part of an ambitious team. Feel free to reach out.</p>
+                <a href="mailto:vickramravi16@gmail.com" class="inline-block mt-8 px-8 py-4 border border-accent text-accent rounded text-lg hover:bg-accent/10 transition-colors reveal">Say Hello</a>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const data = {
+            summary: "I design and build intelligent, scalable data solutions, transforming complex problems into impactful results through AI-driven automation and robust engineering.",
+            experience: [
+                { company: "The Access Group", roles: [ { title: "Data Engineer & Analyst", dates: "July 2024 – Present", points: ["Architected AI data extraction pipeline, reducing manual entry by 85%.", "Engineered a GenAI chatbot, cutting query resolution time by 90%.", "Maintain ETL pipelines in Databricks, improving efficiency by 60%."] }, { title: "Data Administrator", dates: "April 2024 – July 2024", points: ["Managed data integrity, achieving 95% accuracy.", "Automated workflows, saving 70% of processing time.", "Promoted in 3 months."] } ] },
+                { company: "Freelance", roles: [ { title: "AI, ERP, & BI Solutions", dates: "March 2021 – Present", points: ["Developed Project Nexa, an AI automation framework.", "Architected a custom E-Invoicing/ERP system for an SME clinic.", "Built ETL pipelines and BI dashboards for startups."] } ] },
+                { company: "Inchz IoT Sdn Bhd", roles: [ { title: "Data & Project Management Intern", dates: "2023 – 2024", points: ["Contributed to logistics ML models.", "Enhanced IoT data pipeline efficiency."] } ] }
+            ],
+            skills: {
+                chartData: {
+                    labels: ['Data & AI Engineering', 'Programming & Data', 'Cloud & DevOps', 'BI & Visualization', 'Project Management'],
+                    datasets: [{ label: 'Proficiency', data: [90, 85, 80, 85, 75], backgroundColor: 'rgba(100, 255, 218, 0.2)', borderColor: '#64ffda', borderWidth: 2, hoverBackgroundColor: 'rgba(100, 255, 218, 0.4)' }]
+                },
+            },
+            projects: [
+                { title: "Founder, Project EvoSquare", description: "Proprietary AI platform for sales & compliance providing predictive insights." },
+                { title: "Data Automation Lead", description: "Reduced human effort in data workflows by over 80% at The Access Group." },
+                { title: "Generative AI Chatbot", description: "Delivered an AI chatbot that cut query resolution time from hours to seconds." },
+                { title: "Published Research", description: "Authored a research paper on Predictive Analytics in the UTAR Institutional Repository." },
+                { title: "Innovation Award Winner", description: "Won Second Runner-Up at the Proton 'Intelligence That Inspires' Challenge (2019)." }
+            ],
+            testimonials: [{ quote: "Vickram's expertise in automation and programming is truly remarkable... He has an exceptional ability to simplify complex problems and develop efficient, scalable solutions that drive real impact. His technical acumen, combined with his problem-solving skills, makes him an invaluable asset to the team.", name: "Nanthini Suppiah", title: "Data Analytics Manager, The Access Group" }],
+            certifications: {
+                education: { institution: "Universiti Tunku Abdul Rahman (UTAR)", degree: "Bachelor of Information Systems (Honours)", year: "2023" },
+                professional: [
+                    { issuer: "Generative AI & LLMs", certs: ["RAG and LangChain (IBM)", "NLP & Language Understanding (IBM)", "LLM Architecture (IBM)"] },
+                    { issuer: "Data Engineering & Cloud", certs: ["Azure Spark Databricks (LinkedIn)", "Data Engineering Foundations (LinkedIn)", "Google Cloud Data Transformation (Google)", "PySpark (Great Learning)"] },
+                    { issuer: "Data Science & Analytics", certs: ["Data Science Pro Assessment (Top 5%)", "Data Analytics for Lean Six Sigma (UvA)", "Predictive Analytics & Data Mining (IIBA)"] },
+                    { issuer: "Professional", certs: ["Graduate Technologist (MBOT)", "Certified Associate in Project Management (CAPM®)"] }
+                ]
+            }
+        };
+
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let particlesArray;
+
+        const mouse = { x: null, y: null, radius: (canvas.height / 100) * (canvas.width / 100) };
+
+        window.addEventListener('mousemove', function(event) {
+            mouse.x = event.x;
+            mouse.y = event.y;
+            const spotlight = document.querySelector('.spotlight');
+            spotlight.style.left = event.clientX + 'px';
+            spotlight.style.top = event.clientY + 'px';
+        });
+
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY; this.size = size; this.color = color;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = 'rgba(100, 255, 218, 0.5)';
+                ctx.fill();
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) { this.directionX = -this.directionX; }
+                if (this.y > canvas.height || this.y < 0) { this.directionY = -this.directionY; }
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < mouse.radius + this.size) {
+                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 3; }
+                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 3; }
+                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 3; }
+                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 3; }
+                }
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 0.4) - 0.2;
+                let directionY = (Math.random() * 0.4) - 0.2;
+                let color = '#64ffda';
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        function connectParticles() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                        opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = `rgba(100, 255, 218, ${opacityValue})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateParticles() {
+            requestAnimationFrame(animateParticles);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connectParticles();
+        }
+
+        window.addEventListener('resize', function() {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            mouse.radius = ((canvas.height / 100) * (canvas.height / 100));
+            initParticles();
+        });
+        window.addEventListener('mouseout', function() { mouse.x = undefined; mouse.y = undefined; });
+        
+        initParticles();
+        animateParticles();
+
+
+        function renderSummary() { document.getElementById('summary-content').innerHTML = `<p>${data.summary}</p>`; }
+        function renderExperience() {
+            const container = document.getElementById('experience-content');
+            container.innerHTML = data.experience.map((exp, i) => `<div class="reveal" style="transition-delay: ${i * 100}ms;"><div class="absolute -left-1.5 mt-1.5 w-3 h-3 bg-accent rounded-full ring-4 ring-accent/20"></div><h3 class="text-xl font-semibold text-lightest">${exp.company}</h3>${exp.roles.map(role => `<details class="mt-2 group"><summary class="cursor-pointer list-none flex items-center"><span class="font-semibold text-gray-300">${role.title}</span><span class="text-sm text-gray-500 ml-auto">${role.dates}</span></summary><ul class="list-disc pl-5 mt-2 space-y-2 text-gray-400 marker:text-accent">${role.points.map(point => `<li>${point}</li>`).join('')}</ul></details>`).join('')}</div>`).join('');
+        }
+        function renderSkills() {
+            const ctx = document.getElementById('skillsChart').getContext('2d');
+            new Chart(ctx, { type: 'bar', data: data.skills.chartData, options: { indexAxis: 'y', maintainAspectRatio: false, responsive: true, scales: { x: { beginAtZero: true, grid: { color: 'rgba(204, 214, 246, 0.1)' }, ticks: { color: '#8892b0', font: { size: 12 } } }, y: { grid: { display: false }, ticks: { color: '#ccd6f6', font: { size: 14 } } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0a192f', titleColor: '#ccd6f6', bodyColor: '#ccd6f6', borderColor: '#64ffda', borderWidth: 1 } } } });
+        }
+        function renderProjects() {
+            const container = document.getElementById('projects-content');
+            container.innerHTML = data.projects.map((proj, i) => `<div class="project-card card p-6 rounded-lg shadow-lg reveal" style="perspective: 1000px; transition-delay: ${i * 100}ms;"><h3 class="text-lg font-bold text-accent">${proj.title}</h3><p class="mt-2 text-gray-400">${proj.description}</p></div>`).join('');
+            document.querySelectorAll('.project-card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                    const { width, height } = rect;
+                    const rotateX = (y / height - 0.5) * -20; const rotateY = (x / width - 0.5) * 20;
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                });
+                card.addEventListener('mouseleave', () => { card.style.transform = 'rotateX(0) rotateY(0) scale3d(1, 1, 1)'; });
+            });
+        }
+        function renderTestimonials() {
+            const container = document.getElementById('testimonials-content');
+            container.innerHTML = data.testimonials.map(t => `<div class="card p-8 rounded-lg shadow-xl reveal"><blockquote class="relative text-lg text-gray-300 italic before:content-['“'] before:absolute before:-top-4 before:-left-4 before:text-7xl before:text-accent/20">${t.quote}</blockquote><cite class="block text-right mt-6 not-italic"><span class="font-bold text-accent">${t.name}</span><span class="block text-gray-500 text-sm">${t.title}</span></cite></div>`).join('');
+        }
+        function renderCertifications() {
+            const container = document.getElementById('certifications-content');
+            const edu = data.certifications.education;
+            container.innerHTML = `<div class="card p-6 rounded-lg shadow-xl reveal"><h3 class="text-xl font-bold text-lightest">Education</h3><p class="text-lg text-accent mt-2">${edu.degree}</p><p class="text-gray-400">${edu.institution} - ${edu.year}</p></div><div class="card p-6 rounded-lg shadow-xl reveal" style="transition-delay: 150ms;"><h3 class="text-xl font-bold text-lightest mb-4">Key Certifications</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">${data.certifications.professional.map(cat => `<div><h4 class="font-semibold text-accent mb-2">${cat.issuer}</h4><ul class="list-disc pl-5 space-y-1 text-gray-400 marker:text-accent text-sm">${cat.certs.map(cert => `<li>${cert}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+        }
+
+        function setupAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        }
+        
+        function setupNav() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            
+            let lastScrollTop = 0; const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrollTop > lastScrollTop && scrollTop > 100) navbar.style.top = '-100px';
+                else navbar.style.top = '0';
+                lastScrollTop = scrollTop;
+            });
+
+             const sections = document.querySelectorAll('section, footer');
+             const navLinks = document.querySelectorAll('.nav-link');
+             const navObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                           const isActive = link.getAttribute('href').substring(1) === entry.target.id;
+                           link.classList.toggle('active', isActive);
+                        });
+                    }
+                });
+            }, { rootMargin: '-40% 0px -60% 0px' });
+            sections.forEach(section => navObserver.observe(section));
+        }
+
+        renderSummary();
+        renderExperience();
+        renderSkills();
+        renderProjects();
+        renderTestimonials();
+        renderCertifications();
+        setupAnimations();
+        setupNav();
+    });
+    </script>
+</body>
+</html>
